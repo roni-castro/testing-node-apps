@@ -1,22 +1,15 @@
 // Testing Middleware
 
 import {UnauthorizedError} from 'express-jwt'
+import {buildNext, buildReq, buildRes} from 'utils/generate'
 import errorMiddleware from '../error-middleware'
 
-function buildMiddlewareParams(overrides) {
-  const error = new Error('Some message')
-  const res = {json: jest.fn(() => res), status: jest.fn(() => res)}
-  const req = jest.fn()
-  const next = jest.fn()
-
-  return {error, req, res, next, ...overrides}
-}
-
 test('UnauthorizedError is returned with error code and message', () => {
-  const unauthrizedError = new UnauthorizedError('some_error_code', {
+  const error = new UnauthorizedError('some_error_code', {
     message: 'Some message',
   })
-  const {error, req, res} = buildMiddlewareParams({error: unauthrizedError})
+  const req = buildReq()
+  const res = buildRes()
 
   errorMiddleware(error, req, res)
 
@@ -27,15 +20,13 @@ test('UnauthorizedError is returned with error code and message', () => {
   })
 })
 
-test('when headerSent is true it return the error and no new response', () => {
-  const unauthrizedError = new UnauthorizedError('some_error_code', {
+test('when headersSent is true it return the error and no new response', () => {
+  const error = new UnauthorizedError('some_error_code', {
     message: 'Some message',
   })
-  const headerSentRes = {headersSent: true}
-  const {error, req, res, next} = buildMiddlewareParams({
-    error: unauthrizedError,
-    res: headerSentRes,
-  })
+  const res = buildRes({headersSent: true})
+  const req = buildReq()
+  const next = buildNext()
 
   errorMiddleware(error, req, res, next)
 
@@ -43,7 +34,9 @@ test('when headerSent is true it return the error and no new response', () => {
 })
 
 test('error 500 is return with stack trace and message', () => {
-  const {error, req, res} = buildMiddlewareParams()
+  const error = new Error('some message')
+  const res = buildRes()
+  const req = buildReq()
 
   errorMiddleware(error, req, res)
 
