@@ -141,4 +141,4 @@ directly like this:
 ## 🦉 Elaboration & Feedback
 
 After the instruction, copy the URL below into your browser:
-http://ws.kcd.im/?ws=Testing%20Node%20Apps&e=Testing%20Middleware&em=
+http://ws.kcd.im/?ws=Testing%20Node%20Apps&e=Testing%20Middleware&em=roni.c.castro%40gmail.com
