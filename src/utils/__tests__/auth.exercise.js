@@ -1,40 +1,40 @@
+import cases from 'jest-in-case'
 import {isPasswordAllowed} from '../auth'
 
-describe('valid password', () => {
-  ;[{name: 'password is valid', password: '!aBc123'}].forEach(
-    ({name, password}) => {
-      test(name, () => {
-        expect(isPasswordAllowed(password)).toBe(true)
-      })
+cases(
+  'isPasswordAllowed',
+  (opts) => {
+    const result = isPasswordAllowed(opts.password)
+    expect(result).toBe(opts.result)
+  },
+  {
+    'valid password': {
+      password: '!aBc123',
+      result: true,
     },
-  )
-})
-
-describe('invalid password', () => {
-  ;[
-    {name: 'too short', password: 'a2c!'},
-    {name: 'alphabet characters', password: '123456!'},
-    {name: 'no numbers', password: 'ABCdef!'},
-    {name: 'no uppercase letters', password: 'abc123!'},
-    {name: 'no lowercase letters', password: 'ABC123!'},
-    {name: 'non-alphanumeric characters', password: 'ABCdef123'},
-  ].forEach(({name, password}) => {
-    test(name, () => {
-      expect(isPasswordAllowed(password)).toBe(false)
-    })
-  })
-})
-
-
-
-//
-// valid:
-// - !aBc123
-//
-// invalid:
-// - a2c! // too short
-// - 123456! // no alphabet characters
-// - ABCdef! // no numbers
-// - abc123! // no uppercase letters
-// - ABC123! // no lowercase letters
-// - ABCdef123 // no non-alphanumeric characters
+    'password too short': {
+      password: 'a2c!',
+      result: false,
+    },
+    'password no alphabet characters': {
+      password: '123456!',
+      result: false,
+    },
+    'password no numbers': {
+      password: 'ABCdef!',
+      result: false,
+    },
+    'password no uppercase letters': {
+      password: 'abc123!',
+      result: false,
+    },
+    'password no lowercase letters': {
+      password: 'ABC123!',
+      result: false,
+    },
+    'password non-alphanumeric characters': {
+      password: 'ABCdef123',
+      result: false,
+    },
+  },
+)
