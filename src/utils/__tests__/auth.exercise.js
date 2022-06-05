@@ -1,40 +1,34 @@
 import cases from 'jest-in-case'
 import {isPasswordAllowed} from '../auth'
 
+function casify(testCaseObj) {
+  return Object.entries(testCaseObj).map(([name, password]) => ({
+    name: `${password} - ${name}`,
+    password,
+  }))
+}
+
 cases(
-  'isPasswordAllowed',
+  'isPasswordAllowed: valid password',
   (opts) => {
-    const result = isPasswordAllowed(opts.password)
-    expect(result).toBe(opts.result)
+    expect(isPasswordAllowed(opts.password)).toBe(true)
   },
-  {
-    'valid password': {
-      password: '!aBc123',
-      result: true,
-    },
-    'password too short': {
-      password: 'a2c!',
-      result: false,
-    },
-    'password no alphabet characters': {
-      password: '123456!',
-      result: false,
-    },
-    'password no numbers': {
-      password: 'ABCdef!',
-      result: false,
-    },
-    'password no uppercase letters': {
-      password: 'abc123!',
-      result: false,
-    },
-    'password no lowercase letters': {
-      password: 'ABC123!',
-      result: false,
-    },
-    'password non-alphanumeric characters': {
-      password: 'ABCdef123',
-      result: false,
-    },
+  casify({
+    'valid password': '!aBc123',
+  }),
+)
+
+cases(
+  'isPasswordAllowed: invalid passwords',
+  (opts) => {
+    expect(isPasswordAllowed(opts.password)).toBe(false)
   },
+  casify({
+    'too short': 'a2C!',
+    'no alphabet characters': '123456!',
+    'no numbers': 'ABCdef!',
+    'no uppercase letters': 'abc123!',
+    'no lowercase letters': 'ABC123!',
+    'non-alphanumeric characters': 'ABCdef123',
+  }),
 )
