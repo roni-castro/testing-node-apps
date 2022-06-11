@@ -134,9 +134,8 @@ describe('#createListItem', () => {
 describe('#setListItem', () => {
   test('setListItem sets a list item to the request', async () => {
     const user = buildUser()
-    const book = buildBook()
 
-    const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+    const listItem = buildListItem({ownerId: user.id})
     listItemsDB.readById.mockResolvedValueOnce(listItem)
 
     const req = buildReq({user, params: {id: listItem.id}})
@@ -151,12 +150,10 @@ describe('#setListItem', () => {
 
   test('setListItem fails with error 404 if list item is not found', async () => {
     const user = buildUser()
-    const book = buildBook()
 
     const listItem = buildListItem({
       id: 'FAKE_LIST_ID',
       ownerId: user.id,
-      bookId: book.id,
     })
     listItemsDB.readById.mockResolvedValueOnce(null)
 
@@ -177,12 +174,10 @@ describe('#setListItem', () => {
 
   test('setListItem fails with error 403 if user is not the owner of the existing list item', async () => {
     const user = buildUser({id: 'FAKE_USER_ID'})
-    const book = buildBook()
 
     const listItem = buildListItem({
       id: 'FAKE_LIST_ITEM_ID',
       ownerId: 'DIFFERENT_USER_ID',
-      bookId: book.id,
     })
     listItemsDB.readById.mockResolvedValueOnce(listItem)
 
@@ -226,8 +221,7 @@ test('updateListItem updates an existing item', async () => {
 
 test('deleteListItem deletes an existing item', async () => {
   const user = buildUser()
-  const book = buildBook()
-  const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+  const listItem = buildListItem({ownerId: user.id})
   listItemsDB.remove.mockResolvedValue(listItem)
 
   const req = buildReq({user, listItem})
