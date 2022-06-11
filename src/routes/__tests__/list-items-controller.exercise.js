@@ -6,6 +6,7 @@ import {
   buildListItem,
   buildReq,
   buildRes,
+  buildNext,
 } from 'utils/generate'
 
 import * as booksDB from '../../db/books'
@@ -125,5 +126,76 @@ describe('#createListItem', () => {
       ownerId: user.id,
       bookId: book.id,
     })
+  })
+})
+
+describe('#setListItem', () => {
+  test('setListItem sets a list item to the request', async () => {
+    const user = buildUser()
+    const book = buildBook()
+
+    const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+    listItemsDB.readById.mockResolvedValueOnce(listItem)
+
+    const req = buildReq({user, params: {id: listItem.id}})
+    const res = buildRes()
+    const next = buildNext()
+    await listItemsController.setListItem(req, res, next)
+
+    expect(req.listItem).toBe(listItem)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(res.json).not.toHaveBeenCalled()
+  })
+
+  test('setListItem fails with error 404 if list item is not found', async () => {
+    const user = buildUser()
+    const book = buildBook()
+
+    const listItem = buildListItem({
+      id: 'FAKE_LIST_ID',
+      ownerId: user.id,
+      bookId: book.id,
+    })
+    listItemsDB.readById.mockResolvedValueOnce(null)
+
+    const req = buildReq({user, params: {id: listItem.id}})
+    const res = buildRes()
+    const next = buildNext()
+    await listItemsController.setListItem(req, res, next)
+
+    expect(req.listItem).toBeFalsy()
+    expect(res.json.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "message": "No list item was found with the id of FAKE_LIST_ID",
+      }
+    `)
+    expect(res.json).toHaveBeenCalledTimes(1)
+    expect(res.status).toHaveBeenNthCalledWith(1, 404)
+  })
+
+  test('setListItem fails with error 403 if user is not the owner of the existing list item', async () => {
+    const user = buildUser({id: 'FAKE_USER_ID'})
+    const book = buildBook()
+
+    const listItem = buildListItem({
+      id: 'FAKE_LIST_ITEM_ID',
+      ownerId: 'DIFFERENT_USER_ID',
+      bookId: book.id,
+    })
+    listItemsDB.readById.mockResolvedValueOnce(listItem)
+
+    const req = buildReq({user, params: {id: listItem.id}})
+    const res = buildRes()
+    const next = buildNext()
+    await listItemsController.setListItem(req, res, next)
+
+    expect(req.listItem).toBeFalsy()
+    expect(res.json.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "message": "User with id FAKE_USER_ID is not authorized to access the list item FAKE_LIST_ITEM_ID",
+      }
+    `)
+    expect(res.json).toHaveBeenCalledTimes(1)
+    expect(res.status).toHaveBeenNthCalledWith(1, 403)
   })
 })
