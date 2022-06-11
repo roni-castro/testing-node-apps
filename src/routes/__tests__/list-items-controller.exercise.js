@@ -7,6 +7,7 @@ import {
   buildReq,
   buildRes,
   buildNext,
+  notes,
 } from 'utils/generate'
 
 import * as booksDB from '../../db/books'
@@ -199,4 +200,26 @@ describe('#setListItem', () => {
     expect(res.json).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenNthCalledWith(1, 403)
   })
+})
+
+test('updateListItem updates an existing item', async () => {
+  const user = buildUser()
+  const book = buildBook()
+
+  const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+  const updates = {notes: notes()}
+
+  const mergedListItemAndUpdates = {...listItem, ...updates}
+  booksDB.readById.mockResolvedValueOnce(book)
+  listItemsDB.update.mockResolvedValue(mergedListItemAndUpdates)
+
+  const req = buildReq({user, body: updates, listItem})
+  const res = buildRes()
+  await listItemsController.updateListItem(req, res)
+
+  expect(res.json).toHaveBeenNthCalledWith(1, {
+    listItem: {...mergedListItemAndUpdates, book},
+  })
+  expect(booksDB.readById).toHaveBeenNthCalledWith(1, book.id)
+  expect(listItemsDB.update).toHaveBeenNthCalledWith(1, listItem.id, updates)
 })
