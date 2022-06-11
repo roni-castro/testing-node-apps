@@ -1,16 +1,11 @@
 // Testing Controllers
 
-// 🐨 you'll need a few of the generaters from test/utils/generate.js
-// 💰 remember, you can import files in the test/utils directory as if they're node_modules
-// 💰 import * as generate from 'utils/generate'
+import * as generate from 'utils/generate'
 
-// 🐨 getListItem calls `expandBookData` which calls `booksDB.readById`
-// so you'll need to import the booksDB from '../../db/books'
-// 💰 import * as booksDB from '../../db/books'
+import * as booksDB from '../../db/books'
+import * as listItemsDB from '../../db/list-items'
 
-// 🐨 don't forget to import the listItemsController from '../list-items-controller'
-// here, that's the thing we're testing afterall :)
-// 💰 import * as listItemsController from '../list-items-controller'
+import * as listItemsController from '../list-items-controller'
 
 // 🐨 use jest.mock to mock '../../db/books' because we don't actually want to make
 // database calls in this test file.
@@ -20,11 +15,13 @@
 
 test('getListItem returns the req.listItem', async () => {
   // 🐨 create a user
+  const user = generate.buildUser()
   //
   // 🐨 create a book
+  const book = generate.buildBook()
   //
   // 🐨 create a listItem that has the user as the owner and the book
-  // 💰 const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+  const listItem = generate.buildListItem({ownerId: user.id, bookId: book.id})
   //
   // 🐨 mock booksDB.readById to resolve to the book
   // 💰 use mockResolvedValueOnce
@@ -38,6 +35,14 @@ test('getListItem returns the req.listItem', async () => {
   // 💰 just use buildRes from utils/generate
   //
   // 🐨 make a call to getListItem with the req and res (`await` the result)
+  booksDB.insert(book)
+  listItemsDB.create(listItem)
+
+  const req = generate.buildReq({listItem})
+  const res = generate.buildRes()
+  await listItemsController.getListItem(req, res)
+
+  expect(res.json).toHaveBeenCalledWith({listItem: {...listItem, book}})
   //
   // 🐨 assert that booksDB.readById was called correctly
   //
