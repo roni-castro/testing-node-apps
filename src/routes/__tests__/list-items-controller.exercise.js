@@ -223,3 +223,17 @@ test('updateListItem updates an existing item', async () => {
   expect(booksDB.readById).toHaveBeenNthCalledWith(1, book.id)
   expect(listItemsDB.update).toHaveBeenNthCalledWith(1, listItem.id, updates)
 })
+
+test('deleteListItem deletes an existing item', async () => {
+  const user = buildUser()
+  const book = buildBook()
+  const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+  listItemsDB.remove.mockResolvedValue(listItem)
+
+  const req = buildReq({user, listItem})
+  const res = buildRes()
+  await listItemsController.deleteListItem(req, res)
+
+  expect(res.json).toHaveBeenNthCalledWith(1, {success: true})
+  expect(listItemsDB.remove).toHaveBeenNthCalledWith(1, listItem.id)
+})
