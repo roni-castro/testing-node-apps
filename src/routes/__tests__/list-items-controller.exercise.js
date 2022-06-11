@@ -47,7 +47,7 @@ test('getListItems returns the list of listItems', async () => {
   booksDB.readManyById.mockResolvedValueOnce(books)
   listItemsDB.query.mockResolvedValueOnce(listItems)
 
-  const req = buildReq()
+  const req = buildReq({user})
   const res = buildRes()
   await listItemsController.getListItems(req, res)
 
@@ -61,6 +61,7 @@ test('getListItems returns the list of listItems', async () => {
     books[0].id,
     books[1].id,
   ])
+  expect(listItemsDB.query).toHaveBeenNthCalledWith(1, {ownerId: user.id})
 })
 
 describe('#createListItem', () => {
