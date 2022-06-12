@@ -6,9 +6,13 @@ import {getData, handleRequestFailure} from 'utils/async'
 import * as generate from 'utils/generate'
 import startServer from '../start'
 
-let server
+let server, client
 beforeAll(async () => {
-  server = await startServer({port: 8000})
+  server = await startServer()
+  client = axios.create({
+    baseURL: `http://localhost:${server.address().port}/api`,
+  })
+  client.interceptors.response.use(getData, handleRequestFailure)
 })
 
 afterAll(() => {
@@ -18,9 +22,6 @@ afterAll(() => {
 beforeEach(async () => {
   await resetDb()
 })
-
-const client = axios.create({baseURL: 'http://localhost:8000/api'})
-client.interceptors.response.use(getData, handleRequestFailure)
 
 test('auth flow', async () => {
   const username = 'fake_user_name'
