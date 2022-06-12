@@ -37,25 +37,26 @@ test('getListItem returns the req.listItem', async () => {
   expect(booksDB.readById).toHaveBeenNthCalledWith(1, book.id)
 })
 
-test('getListItems returns the list of listItems', async () => {
+test(`getListItems returns a user's list items`, async () => {
   const user = buildUser()
   const books = [buildBook(), buildBook()]
-  const listItems = [
+  const userListItems = [
     buildListItem({ownerId: user.id, bookId: books[0].id}),
     buildListItem({ownerId: user.id, bookId: books[1].id}),
   ]
 
   booksDB.readManyById.mockResolvedValueOnce(books)
-  listItemsDB.query.mockResolvedValueOnce(listItems)
+  listItemsDB.query.mockResolvedValueOnce(userListItems)
 
   const req = buildReq({user})
   const res = buildRes()
+
   await listItemsController.getListItems(req, res)
 
   expect(res.json).toHaveBeenNthCalledWith(1, {
     listItems: [
-      {...listItems[0], book: books[0]},
-      {...listItems[1], book: books[1]},
+      {...userListItems[0], book: books[0]},
+      {...userListItems[1], book: books[1]},
     ],
   })
   expect(booksDB.readManyById).toHaveBeenNthCalledWith(1, [
