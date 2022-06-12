@@ -197,19 +197,20 @@ describe('#setListItem', () => {
   })
 })
 
-test('updateListItem updates an existing item', async () => {
+test('updateListItem updates an existing list item', async () => {
   const user = buildUser()
   const book = buildBook()
-
   const listItem = buildListItem({ownerId: user.id, bookId: book.id})
   const updates = {notes: notes()}
 
   const mergedListItemAndUpdates = {...listItem, ...updates}
+
   booksDB.readById.mockResolvedValueOnce(book)
-  listItemsDB.update.mockResolvedValue(mergedListItemAndUpdates)
+  listItemsDB.update.mockResolvedValueOnce(mergedListItemAndUpdates)
 
   const req = buildReq({user, body: updates, listItem})
   const res = buildRes()
+
   await listItemsController.updateListItem(req, res)
 
   expect(res.json).toHaveBeenNthCalledWith(1, {
