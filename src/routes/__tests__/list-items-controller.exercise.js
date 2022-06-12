@@ -109,11 +109,12 @@ describe('#createListItem', () => {
   test('createListItem returns a 400 error if the user already has a list item for the given book', async () => {
     const user = buildUser({id: 'FAKE_USER_ID'})
     const book = buildBook({id: 'FAKE_BOOK_ID'})
+    
     const req = buildReq({user, body: {bookId: book.id}})
     const res = buildRes()
-    const listItem = buildListItem({ownerId: user.id, bookId: book.id})
-    listItemsDB.query.mockResolvedValue([listItem])
-
+    const existingListItem = buildListItem({ownerId: user.id, bookId: book.id})
+    listItemsDB.query.mockResolvedValueOnce([existingListItem])
+  
     await listItemsController.createListItem(req, res)
 
     expect(res.json.mock.calls[0][0]).toMatchInlineSnapshot(`
