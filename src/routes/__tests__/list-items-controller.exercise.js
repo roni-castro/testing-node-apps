@@ -66,20 +66,22 @@ test('getListItems returns the list of listItems', async () => {
 })
 
 describe('#createListItem', () => {
-  test('createListItem creates a list of items', async () => {
+  test('createListItem creates and returns a list item', async () => {
     const user = buildUser()
     const book = buildBook()
-
-    const listItem = buildListItem({ownerId: user.id, bookId: book.id})
+    const createdListItem = buildListItem({ownerId: user.id, bookId: book.id})
     booksDB.readById.mockResolvedValueOnce(book)
-    listItemsDB.create.mockResolvedValueOnce(listItem)
-    listItemsDB.query.mockResolvedValue([])
+    listItemsDB.create.mockResolvedValueOnce(createdListItem)
+    listItemsDB.query.mockResolvedValueOnce([])
 
     const req = buildReq({user, body: {bookId: book.id}})
     const res = buildRes()
+
     await listItemsController.createListItem(req, res)
 
-    expect(res.json).toHaveBeenNthCalledWith(1, {listItem: {...listItem, book}})
+    expect(res.json).toHaveBeenNthCalledWith(1, {
+      listItem: {...createdListItem, book},
+    })
     expect(booksDB.readById).toHaveBeenNthCalledWith(1, book.id)
     expect(listItemsDB.create).toHaveBeenNthCalledWith(1, {
       ownerId: user.id,
@@ -109,12 +111,12 @@ describe('#createListItem', () => {
   test('createListItem returns a 400 error if the user already has a list item for the given book', async () => {
     const user = buildUser({id: 'FAKE_USER_ID'})
     const book = buildBook({id: 'FAKE_BOOK_ID'})
-    
+
     const req = buildReq({user, body: {bookId: book.id}})
     const res = buildRes()
     const existingListItem = buildListItem({ownerId: user.id, bookId: book.id})
     listItemsDB.query.mockResolvedValueOnce([existingListItem])
-  
+
     await listItemsController.createListItem(req, res)
 
     expect(res.json.mock.calls[0][0]).toMatchInlineSnapshot(`
