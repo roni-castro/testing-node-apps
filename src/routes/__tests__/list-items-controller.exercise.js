@@ -149,6 +149,7 @@ describe('#setListItem', () => {
 
     expect(req.listItem).toBe(listItem)
     expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(/** nothing */)
     expect(res.json).not.toHaveBeenCalled()
   })
 
@@ -174,6 +175,7 @@ describe('#setListItem', () => {
     `)
     expect(res.json).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenNthCalledWith(1, 404)
+    expect(next).not.toHaveBeenCalled()
   })
 
   test('setListItem fails with error 403 if user is not the owner of the existing list item', async () => {
@@ -198,6 +200,7 @@ describe('#setListItem', () => {
     `)
     expect(res.json).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenNthCalledWith(1, 403)
+    expect(next).not.toHaveBeenCalled()
   })
 })
 
