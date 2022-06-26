@@ -4,7 +4,6 @@ import axios from 'axios'
 import {resetDb, insertTestUser} from 'utils/db-utils'
 import {getData, handleRequestFailure, resolve} from 'utils/async'
 import * as generate from 'utils/generate'
-import * as DbUtils from 'db/utils'
 import * as booksDB from '../db/books'
 import startServer from '../start'
 
@@ -35,8 +34,6 @@ async function setup() {
 
 test('listItem CRUD', async () => {
   const {testUser, authAPI} = await setup()
-  const mockedListItemId = 'mocked_uuid'
-  jest.spyOn(DbUtils, 'generateUUID').mockReturnValue(mockedListItemId)
 
   const book = generate.buildBook()
   await booksDB.insert(book)
@@ -54,15 +51,12 @@ test('listItem CRUD', async () => {
 
   // READ
   const readData = await authAPI.get(listItemIdUrl)
-  expect(readData.listItem).toMatchObject({
-    ownerId: testUser.id,
-    bookId: book.id,
-  })
+  expect(readData.listItem).toEqual(createdData.listItem)
 
   // UPDATE
   const updates = {notes: generate.notes()}
   const updateData = await authAPI.put(listItemIdUrl, updates)
-  expect(updateData.listItem).toMatchObject({
+  expect(updateData.listItem).toEqual({
     ...readData.listItem,
     ...updateData.listItem,
   })
@@ -72,10 +66,14 @@ test('listItem CRUD', async () => {
   expect(deleteData).toEqual({success: true})
 
   const error = await authAPI.get(listItemIdUrl).catch(resolve)
+  error.data.message = error.data.message.replace(
+    listItemId,
+    'mocked_list_item_uuid',
+  )
   expect(error.status).toBe(404)
   expect(error.data).toMatchInlineSnapshot(`
     Object {
-      "message": "No list item was found with the id of mocked_uuid",
+      "message": "No list item was found with the id of mocked_list_item_uuid",
     }
   `)
 })
